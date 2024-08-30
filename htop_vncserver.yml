@@ -1,0 +1,38 @@
+---
+- name: Update package manager cache and install htop & TigerVNC Server
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Update package cache for CentOS/RHEL
+      dnf:
+        update_cache: yes
+      when: ansible_distribution in ["CentOS", "Red Hat Enterprise Linux"]
+
+    - name: Update package cache for Ubuntu
+      apt: 
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install htop
+      package:
+        name: htop
+        state: present
+
+    - name: Install TigerVNC Server on CentOS/RHEL
+      yum:
+        name: tigervnc-server
+        state: present
+      when: ansible_distribution in ["CentOS", "Red Hat Enterprise Linux"]
+
+    - name: Install TigerVNC Server on Ubuntu
+      apt:
+        name: tigervnc-standalone-server
+        state: present
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Enable TigerVNC service
+      service:
+        name: vncserver@:1.service  # Adjust if using a different display number
+        enabled: yes
+        state: started

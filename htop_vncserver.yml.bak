@@ -1,0 +1,25 @@
+---
+- name: Update and Install Packages
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Update package cache
+      package:
+        update_cache: yes
+
+    - name: Install required packages
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - htop
+        - "{{ lookup('ternary', 
+                      ansible_distribution in ['CentOS', 'Red Hat Enterprise Linux'], 'tigervnc-server', 
+                      ansible_distribution == 'Ubuntu', 'tigervnc-standalone-server') }}" 
+
+    - name: Fail on unsupported distribution
+      fail:
+        msg: "Unsupported distribution: {{ ansible_distribution }}"
+      when: item == 'unknown-package'
+      loop: "{{ play.all_tasks.1.with_items }}"  # Reference the list of packages from the previous task

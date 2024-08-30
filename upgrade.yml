@@ -1,0 +1,16 @@
+---
+- name: Upgrade all packages on the server
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Upgrade all packages (Debian-based)
+      apt:
+        upgrade: dist
+      when: ansible_pkg_mgr == 'apt'
+
+    - name: Upgrade all packages (Red Hat-based)
+      yum:
+        name: '*'
+        state: latest
+      when: ansible_pkg_mgr == 'yum'
